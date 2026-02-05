@@ -5,6 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Text Flash Animation</title>
+  <style id="dynamic-keyframes">
+    /* Dynamic keyframes will be injected here */
+  </style>
   <style>
     :root {
       --color-1: #000000;
@@ -13,7 +16,8 @@
       --color-4: #B3C6FF;
       --color-5: #99A8C7;
       --color-6: #80ACFF;
-      --duration: 3s;
+      --flash-duration: 2s;
+      --repeat-delay: 1s;
       --easing: cubic-bezier(0.7, 0, 0.3, 1);
       --angle: 90deg;
       --font-size: 48px;
@@ -67,50 +71,6 @@
       background-clip: text;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: gradientShift var(--duration) var(--easing) infinite;
-    }
-
-    @keyframes gradientShift {
-
-      0%,
-      10% {
-        background: #101419;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: inherit;
-        /* Fallback */
-        -webkit-text-fill-color: #101419;
-      }
-
-      15% {
-        background: linear-gradient(var(--angle),
-            var(--color-1) 0,
-            var(--color-1) 33.33%,
-            var(--color-2) 40%,
-            var(--color-3) 45%,
-            var(--color-4) 50%,
-            var(--color-5) 55%,
-            var(--color-6) 60%,
-            transparent 66.67%,
-            transparent);
-        background-size: 300% 100%;
-        background-position: 100% 0;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-
-      68.33% {
-        background-position: 0 0;
-      }
-
-      83.33%,
-      100% {
-        background: #101419;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: #101419;
-      }
     }
 
     /* Controls UI */
@@ -120,7 +80,7 @@
       left: 50%;
       transform: translateX(-50%);
       width: 95%;
-      max-width: 1000px;
+      max-width: 1100px;
       z-index: 100;
     }
 
@@ -140,7 +100,7 @@
     .control-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 24px;
+      gap: 20px;
       align-items: center;
       justify-content: center;
     }
@@ -161,7 +121,7 @@
 
     .color-pickers {
       display: flex;
-      gap: 12px;
+      gap: 8px;
     }
 
     .color-picker-item {
@@ -175,8 +135,8 @@
       -webkit-appearance: none;
       appearance: none;
       border: none;
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       cursor: pointer;
       background: none;
@@ -196,7 +156,7 @@
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
-      width: 100px;
+      width: 90px;
       height: 4px;
       background: rgba(0, 0, 0, 0.1);
       border-radius: 2px;
@@ -254,7 +214,7 @@
     /* Responsive */
     @media (max-width: 768px) {
       body {
-        padding-bottom: 250px;
+        padding-bottom: 300px;
       }
 
       h1 {
@@ -275,7 +235,7 @@
       }
 
       input[type="range"] {
-        width: 80px;
+        width: 70px;
       }
 
       input[type="text"] {
@@ -298,30 +258,23 @@
         <div class="control-group">
           <span class="control-label">Colors</span>
           <div class="color-pickers">
-            <div class="color-picker-item">
-              <input type="color" id="color-1" value="#000000">
-            </div>
-            <div class="color-picker-item">
-              <input type="color" id="color-2" value="#6B8FBF">
-            </div>
-            <div class="color-picker-item">
-              <input type="color" id="color-3" value="#6CB5EB">
-            </div>
-            <div class="color-picker-item">
-              <input type="color" id="color-4" value="#B3C6FF">
-            </div>
-            <div class="color-picker-item">
-              <input type="color" id="color-5" value="#99A8C7">
-            </div>
-            <div class="color-picker-item">
-              <input type="color" id="color-6" value="#80ACFF">
-            </div>
+            <div class="color-picker-item"><input type="color" id="color-1" value="#000000"></div>
+            <div class="color-picker-item"><input type="color" id="color-2" value="#6B8FBF"></div>
+            <div class="color-picker-item"><input type="color" id="color-3" value="#6CB5EB"></div>
+            <div class="color-picker-item"><input type="color" id="color-4" value="#B3C6FF"></div>
+            <div class="color-picker-item"><input type="color" id="color-5" value="#99A8C7"></div>
+            <div class="color-picker-item"><input type="color" id="color-6" value="#80ACFF"></div>
           </div>
         </div>
 
         <div class="control-group">
-          <span class="control-label">Duration</span>
-          <input type="range" id="duration-slider" min="0.5" max="10" step="0.1" value="3">
+          <span class="control-label">Flash</span>
+          <input type="range" id="flash-slider" min="0.5" max="5" step="0.1" value="2">
+        </div>
+
+        <div class="control-group">
+          <span class="control-label">Delay</span>
+          <input type="range" id="delay-slider" min="0" max="10" step="0.1" value="1">
         </div>
 
         <div class="control-group">
@@ -359,42 +312,95 @@
 
   <script>
     const pickers = document.querySelectorAll('input[type="color"]');
-    const durationSlider = document.getElementById('duration-slider');
+    const flashSlider = document.getElementById('flash-slider');
+    const delaySlider = document.getElementById('delay-slider');
     const easingSelect = document.getElementById('easing-select');
     const angleSlider = document.getElementById('angle-slider');
     const sizeSlider = document.getElementById('size-slider');
     const textInput = document.getElementById('text-input');
     const heading = document.getElementById('main-heading');
     const colorRoot = document.documentElement;
+    const dynamicStyles = document.getElementById('dynamic-keyframes');
 
-    function restartAnimation() {
+    function updateAnimation() {
+      const f = parseFloat(flashSlider.value);
+      const d = parseFloat(delaySlider.value);
+      const total = f + d;
+      const ratio = f / total;
+
+      // Calculate keyframe percentages based on the ratio
+      const p1 = (0.10 * ratio * 100).toFixed(2);
+      const p2 = (0.15 * ratio * 100).toFixed(2);
+      const p3 = (0.6833 * ratio * 100).toFixed(2);
+      const p4 = (0.8333 * ratio * 100).toFixed(2);
+      const p5 = (1.0 * ratio * 100).toFixed(2);
+
+      const keyframes = `
+        @keyframes dynamicGradientShift {
+          0%, ${p1}% {
+            background: #101419;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: #101419;
+          }
+          ${p2}% {
+            background: linear-gradient(var(--angle),
+                var(--color-1) 0,
+                var(--color-1) 33.33%,
+                var(--color-2) 40%,
+                var(--color-3) 45%,
+                var(--color-4) 50%,
+                var(--color-5) 55%,
+                var(--color-6) 60%,
+                transparent 66.67%,
+                transparent);
+            background-size: 300% 100%;
+            background-position: 100% 0;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          }
+          ${p3}% {
+            background-position: 0 0;
+          }
+          ${p4}%, 100% {
+            background: #101419;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: #101419;
+          }
+        }
+      `;
+
+      dynamicStyles.innerHTML = keyframes;
+
       const text = document.querySelector('.gradient-text');
-      if (!text) return;
-      text.style.animation = 'none';
-      text.offsetHeight; // Trigger reflow
-      text.style.animation = null;
+      if (text) {
+        text.style.animation = 'none';
+        text.offsetHeight; // Trigger reflow
+        text.style.animation = `dynamicGradientShift ${total}s var(--easing) infinite`;
+      }
     }
 
     pickers.forEach(picker => {
       picker.addEventListener('input', (e) => {
         colorRoot.style.setProperty(`--${e.target.id}`, e.target.value);
-        restartAnimation();
+        updateAnimation();
       });
     });
 
-    durationSlider.addEventListener('input', (e) => {
-      colorRoot.style.setProperty('--duration', `${e.target.value}s`);
-      restartAnimation();
-    });
-
-    easingSelect.addEventListener('change', (e) => {
-      colorRoot.style.setProperty('--easing', e.target.value);
-      restartAnimation();
+    [flashSlider, delaySlider, easingSelect].forEach(el => {
+      el.addEventListener('input', () => {
+        if (el.id === 'easing-select') {
+          colorRoot.style.setProperty('--easing', el.value);
+        }
+        updateAnimation();
+      });
     });
 
     angleSlider.addEventListener('input', (e) => {
       colorRoot.style.setProperty('--angle', `${e.target.value}deg`);
-      restartAnimation();
+      updateAnimation();
     });
 
     sizeSlider.addEventListener('input', (e) => {
@@ -403,14 +409,13 @@
 
     textInput.addEventListener('input', (e) => {
       const val = e.target.value;
-      // Use {} to denote the gradient part
       const parts = val.split(/{(.*?)}/);
       if (parts.length >= 3) {
         heading.innerHTML = `${parts[0]}<span class="gradient-text">${parts[1]}</span>${parts[2]}`;
       } else {
         heading.innerHTML = `<span class="gradient-text">${val}</span>`;
       }
-      restartAnimation();
+      updateAnimation();
     });
 
     const copyBtn = document.getElementById('copy-btn');
@@ -419,7 +424,8 @@
       pickers.forEach((picker, index) => {
         css += `  --color-${index + 1}: ${picker.value};\n`;
       });
-      css += `  --duration: ${durationSlider.value}s;\n`;
+      css += `  --flash-duration: ${flashSlider.value}s;\n`;
+      css += `  --repeat-delay: ${delaySlider.value}s;\n`;
       css += `  --easing: ${easingSelect.value};\n`;
       css += `  --angle: ${angleSlider.value}deg;\n`;
       css += `  --font-size: ${sizeSlider.value}px;\n`;
